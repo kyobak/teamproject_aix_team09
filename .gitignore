@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# 환경 변수·비밀 — 절대 커밋 금지
+.env
+.env.*
+
+# 데이터·모델 — 공유 드라이브에 둠 (CONTRIBUTING.md 데이터 규칙)
+data/**
+!data/.gitkeep
+!data/labels/
+!data/labels/**
+!data/splits/
+!data/splits/**
+!data/clips.csv
+models/**
+!models/.gitkeep
+*.mp4
+*.mov
+*.avi
+*.jpg
+*.jpeg
+*.png
+!docs/**/*.png
+!tests/fixtures/**
+*.pt
+*.onnx
+
+# 실행 로그
+logs/
+
+# OS / 에디터
+.DS_Store
+.idea/
+.vscode/

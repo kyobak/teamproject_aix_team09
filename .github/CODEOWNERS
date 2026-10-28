@@ -1,0 +1,5 @@
+# 안전 파일은 두 사람이 본다 (CONTRIBUTING.md 5절)
+/walkaid/logic/signal_fsm.py    @kyobak @ParkJiSeong901
+/walkaid/logic/signal_color.py  @ParkJiSeong901 @kyobak
+/config.yaml                    @kyobak @ParkJiSeong901
+/.github/                       @kyobak

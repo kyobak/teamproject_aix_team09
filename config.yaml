@@ -1,0 +1,13 @@
+# 안전 관련 값 — 바꿀 때는 safety 라벨 + 2명 승인 (CONTRIBUTING.md 머지 규칙)
+signal:
+  # OpenCV HSV (H: 0~179). 시작값이며 우리 영상으로 다시 맞춘다 (#6)
+  red_ranges: [[[0, 100, 120], [10, 255, 255]], [[170, 100, 120], [179, 255, 255]]]
+  green_range: [[50, 80, 120], [95, 255, 255]]
+  min_conf: 0.8
+fsm:
+  stable_frames: 3        # 같은 색이 연속 N프레임일 때만 상태 변경 (#7)
+  no_signal_sec: 2.0      # 신호등이 이 시간 이상 안 보이면 NO_SIGNAL
+  frame_gap_sec: 1.0      # 프레임이 이 시간 이상 끊기면 UNKNOWN
+  blink_window_sec: 2.0
+runtime:
+  target_fps: 5

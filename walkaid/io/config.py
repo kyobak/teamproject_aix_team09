@@ -1,0 +1,15 @@
+"""config.yaml 읽기."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+DEFAULT_PATH = Path(__file__).resolve().parents[2] / "config.yaml"
+
+
+def load_config(path: str | Path = DEFAULT_PATH) -> dict[str, Any]:
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
