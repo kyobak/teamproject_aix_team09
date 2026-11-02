@@ -1,0 +1,30 @@
+# 설정 방법과 알림 목록: docs/slack-notifications.md
+name: Slack Notify
+
+# pull_request_target 은 쓰지 않습니다. 포크 PR 에 시크릿을 넘기지 않는 것이 공개 저장소에서 안전합니다.
+on:
+  pull_request:
+    types: [opened, ready_for_review, review_requested, closed]
+  pull_request_review:
+    types: [submitted]
+  issues:
+    types: [opened]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # 제목 같은 사용자 입력을 ${{ }} 로 명령에 끼우면 명령 주입이 되므로, 스크립트가 이벤트 파일을 직접 읽습니다.
+      - run: python3 tools/slack_notify.py
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
