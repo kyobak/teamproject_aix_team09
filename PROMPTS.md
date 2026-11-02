@@ -29,3 +29,11 @@
 - 쓴 것: `CONTRIBUTING.md` 1·3·5·6절 보완, PR 템플릿 안내 한 줄, main 보호(Approve 1명·CI 필수·대화 Resolve·관리자 포함)와 Squash 만 허용·머지 후 브랜치 삭제 설정
 - 버린 것: Git Flow(`develop` 브랜치), AI 기록을 PR 별 파일로 나누는 안, CODEOWNERS 리뷰 강제
 - 버린 이유: 4명·4주 프로젝트에는 브랜치가 하나 더 있으면 관리만 늘어남. 수업이 `PROMPTS.md` 한 파일을 요구함. `/.github/` 담당이 박재원 한 명이라 강제하면 본인 PR 을 아무도 승인할 수 없음
+
+### [슬랙 알림] 박재원 · 2026-11-01
+
+- 무엇을 하려고: PR·리뷰·이슈·main CI 실패를 팀 슬랙 채널로 받기
+- 프롬프트 원문: 깃허브 파일읽고 슬랙에 알림기능 연동시켜줘 / 머지, pr, 리뷰어 지정 등 매번 슬랙에 올릴 메세지 틀 및 구조 만들어줘.
+- 쓴 것: `tools/slack_notify.py`, `.github/workflows/slack-notify.yml`, `tests/test_slack_notify.py`, `docs/slack-notifications.md` (메시지 틀 7종)
+- 버린 것: `pull_request_target` 트리거, 커밋마다 보내는 알림, 일반 리뷰 코멘트 알림
+- 버린 이유: 공개 저장소에서 포크 PR 에 시크릿을 넘기면 위험함. 알림이 많으면 채널을 안 보게 되므로 행동이 필요한 이벤트만 남김
