@@ -21,3 +21,11 @@
 - 쓴 것: 폴더 뼈대(`walkaid/`), `requirements*.txt`, `tools/check_env.py`, CI, PR 템플릿, CONTRIBUTING.md, 이슈 16개
 - 버린 것: 최상위 폴더 이름 `io/`
 - 버린 이유: 파이썬 표준 라이브러리 `io` 와 이름이 겹쳐 import 가 깨짐 → `walkaid/io/` 로 옮김
+
+### [협업 규칙 보완] 박재원 · 2026-11-02
+
+- 무엇을 하려고: 브랜치·PR 진행 중 실제로 막힌 지점(작업 섞임, 번호 혼동, PR 후 rebase, PROMPTS.md 충돌)을 규칙과 GitHub 설정에 반영
+- 프롬프트 원문: 팀의 브랜치·PR 진행 방식 / 내가 팀장이기에, 합의는 굳이 필요없어.
+- 쓴 것: `CONTRIBUTING.md` 1·3·5·6절 보완, PR 템플릿 안내 한 줄, main 보호(Approve 1명·CI 필수·대화 Resolve·관리자 포함)와 Squash 만 허용·머지 후 브랜치 삭제 설정
+- 버린 것: Git Flow(`develop` 브랜치), AI 기록을 PR 별 파일로 나누는 안, CODEOWNERS 리뷰 강제
+- 버린 이유: 4명·4주 프로젝트에는 브랜치가 하나 더 있으면 관리만 늘어남. 수업이 `PROMPTS.md` 한 파일을 요구함. `/.github/` 담당이 박재원 한 명이라 강제하면 본인 PR 을 아무도 승인할 수 없음
