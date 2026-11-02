@@ -21,3 +21,11 @@
 - 쓴 것: 폴더 뼈대(`walkaid/`), `requirements*.txt`, `tools/check_env.py`, CI, PR 템플릿, CONTRIBUTING.md, 이슈 16개
 - 버린 것: 최상위 폴더 이름 `io/`
 - 버린 이유: 파이썬 표준 라이브러리 `io` 와 이름이 겹쳐 import 가 깨짐 → `walkaid/io/` 로 옮김
+
+### [슬랙 알림] 박재원 · 2026-11-01
+
+- 무엇을 하려고: PR·리뷰·이슈·main CI 실패를 팀 슬랙 채널로 받기
+- 프롬프트 원문: 깃허브 파일읽고 슬랙에 알림기능 연동시켜줘 / 머지, pr, 리뷰어 지정 등 매번 슬랙에 올릴 메세지 틀 및 구조 만들어줘.
+- 쓴 것: `tools/slack_notify.py`, `.github/workflows/slack-notify.yml`, `tests/test_slack_notify.py`, `docs/slack-notifications.md` (메시지 틀 7종)
+- 버린 것: `pull_request_target` 트리거, 커밋마다 보내는 알림, 일반 리뷰 코멘트 알림
+- 버린 이유: 공개 저장소에서 포크 PR 에 시크릿을 넘기면 위험함. 알림이 많으면 채널을 안 보게 되므로 행동이 필요한 이벤트만 남김

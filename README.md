@@ -62,6 +62,7 @@ PR 마다 GitHub Actions 가 같은 검사를 돌립니다.
 
 브랜치·커밋·PR·리뷰·머지 규칙은 [`CONTRIBUTING.md`](CONTRIBUTING.md), 팀 규칙은 [`docs/team-rules.md`](docs/team-rules.md).
 AI 사용 기록은 [`PROMPTS.md`](PROMPTS.md), 윤리적 판단은 [`ETHICS.md`](ETHICS.md).
+PR·리뷰·CI 슬랙 알림은 [`docs/slack-notifications.md`](docs/slack-notifications.md).
 
 ## 데이터와 개인정보
 
