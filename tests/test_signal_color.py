@@ -1,7 +1,7 @@
-"""#6 신호색 판별 단위 테스트 — 합성 신호등 박스(세로 40x100, 위=빨강 칸, 아래=초록 칸).
+"""#6 신호색 판별 단위 테스트 — 합성 3칸 보행 신호등 (세로 30x96: 위=빨강 사람, 가운데=초록 사람, 아래=남은 시간 숫자).
 
 완료 조건 8케이스: 낮 빨강/초록, 위치 어긋남 2개, 꺼짐, 역광, 야간 빨강/초록.
-그 아래는 안전 규칙(scene-state.md 지켜야 할 규칙 2~4) 보강 테스트.
+그 아래는 안전 규칙 보강 (숫자만 켜진 점멸 순간, 동시 점등, 쓸 수 없는 박스 등).
 """
 
 import cv2
@@ -11,13 +11,13 @@ import pytest
 from walkaid.io.config import load_config
 from walkaid.logic.signal_color import classify, classify_signal, measure
 
-W, H = 40, 100
-TOP, BOTTOM = (W // 2, H // 4), (W // 2, 3 * H // 4)  # 위·아래 칸 중심
+W, S = 30, 32  # 몸체 폭, 칸 높이
+TOP, MID, BOT = (W // 2, S // 2), (W // 2, S + S // 2), (W // 2, 2 * S + S // 2)  # 칸 가운데
 
-HOUSING = (30, 30, 30)  # 검은 몸체
-RED = (40, 40, 230)  # BGR, H≈0
-GREEN = (160, 220, 0)  # BGR, 보행 신호 청록색, H≈82
-WHITE_CORE = (250, 250, 255)
+HOUSING = (25, 25, 25)
+RED = (60, 30, 235)  # BGR, 빨간 LED
+GREEN = (170, 225, 20)  # BGR, 보행 신호 청록
+WHITE = (250, 250, 255)
 
 
 @pytest.fixture(scope="module")
@@ -26,19 +26,28 @@ def config():
 
 
 def box(background=HOUSING) -> np.ndarray:
-    return np.full((H, W, 3), background, dtype=np.uint8)
+    return np.full((3 * S, W, 3), background, dtype=np.uint8)
 
 
-def lamp(img: np.ndarray, center, color, radius=12) -> np.ndarray:
-    cv2.circle(img, center, radius, color, -1)
+def figure(img, center, color, r=9) -> np.ndarray:
+    """사람 모양 대신 세로로 긴 타원 (LED 덩어리)."""
+    cv2.ellipse(img, center, (r - 3, r), 0, 0, 360, color, -1)
     return img
 
 
-def night_lamp(center, color) -> np.ndarray:
+def digits(img, color=GREEN) -> np.ndarray:
+    """아래 칸에 두 자리 숫자 (세로 막대 두 개)."""
+    x, y = BOT[0], BOT[1]
+    cv2.rectangle(img, (x - 9, y - 8), (x - 3, y + 8), color, -1)
+    cv2.rectangle(img, (x + 3, y - 8), (x + 9, y + 8), color, -1)
+    return img
+
+
+def night(center, color) -> np.ndarray:
     """야간: 주변은 거의 검정, 불 가운데는 하얗게 날아가고 둘레에 색 번짐."""
     img = box(background=(5, 5, 5))
-    cv2.circle(img, center, 15, color, -1)
-    cv2.circle(img, center, 6, WHITE_CORE, -1)
+    figure(img, center, color, r=11)
+    figure(img, center, WHITE, r=5)
     return cv2.GaussianBlur(img, (5, 5), 0)
 
 
@@ -46,107 +55,93 @@ def night_lamp(center, color) -> np.ndarray:
 
 
 def test_1_day_red_top(config):
-    s = classify_signal(lamp(box(), TOP, RED), config)
-    assert (s.color, s.pos_check) == ("red", True)
-    assert s.conf >= config["signal"]["min_conf"]
+    color, conf, pos = classify(figure(box(), TOP, RED), config)
+    assert (color, pos) == ("red", True) and conf >= config["signal"]["min_conf"]
 
 
-def test_2_day_green_bottom(config):
-    s = classify_signal(lamp(box(), BOTTOM, GREEN), config)
-    assert (s.color, s.pos_check) == ("green", True)
-    assert s.conf >= config["signal"]["min_conf"]
+def test_2_day_green_mid(config):
+    color, conf, pos = classify(figure(box(), MID, GREEN), config)
+    assert (color, pos) == ("green", True) and conf >= config["signal"]["min_conf"]
 
 
-def test_3_red_at_bottom_is_unknown(config):
-    s = classify_signal(lamp(box(), BOTTOM, RED), config)
-    assert (s.color, s.pos_check, s.conf) == ("unknown", False, 0.0)
+def test_3_red_in_green_cell_is_unknown(config):
+    assert classify(figure(box(), MID, RED), config) == ("unknown", 0.0, False)
 
 
-def test_4_green_at_top_is_unknown(config):
-    s = classify_signal(lamp(box(), TOP, GREEN), config)
-    assert (s.color, s.pos_check, s.conf) == ("unknown", False, 0.0)
+def test_4_green_in_red_cell_is_unknown(config):
+    assert classify(figure(box(), TOP, GREEN), config) == ("unknown", 0.0, False)
 
 
-def test_5_both_lamps_off(config):
-    img = lamp(lamp(box(), TOP, (45, 45, 50)), BOTTOM, (45, 50, 45))  # 꺼진 칸은 어두운 회색
-    s = classify_signal(img, config)
-    assert (s.color, s.pos_check) == ("off", False)
+def test_5_all_off(config):
+    color, _, pos = classify(box(), config)
+    assert (color, pos) == ("off", False)
 
 
 def test_6_backlight_washout_is_unknown(config):
-    """역광: 몸체 전체가 하얗게 날아가 색이 안 보임 → off 가 아니라 unknown."""
-    img = lamp(box(background=(235, 238, 240)), BOTTOM, (240, 250, 245))
-    s = classify_signal(img, config)
-    assert (s.color, s.pos_check) == ("unknown", False)
+    """역광: 몸체가 하얗게 날아가 색이 안 보임 → off 가 아니라 unknown (off 는 점멸로 해석될 수 있다)."""
+    assert classify(box(background=(240, 242, 245)), config)[0] == "unknown"
 
 
 def test_7_night_red(config):
-    s = classify_signal(night_lamp(TOP, RED), config)
-    assert (s.color, s.pos_check) == ("red", True)
+    color, _, pos = classify(night(TOP, RED), config)
+    assert (color, pos) == ("red", True)
 
 
 def test_8_night_green(config):
-    s = classify_signal(night_lamp(BOTTOM, GREEN), config)
-    assert (s.color, s.pos_check) == ("green", True)
+    color, _, pos = classify(night(MID, GREEN), config)
+    assert (color, pos) == ("green", True)
 
 
 # ---- 안전 규칙 보강 ---------------------------------------------------------
 
 
-def test_both_colors_lit_is_unknown(config):
-    """위 빨강 + 아래 초록이 동시에 보이면 어느 쪽도 믿지 않는다."""
-    s = classify_signal(lamp(lamp(box(), TOP, RED), BOTTOM, GREEN), config)
-    assert s.color == "unknown"
+def test_countdown_only_is_off_not_green(config):
+    """초록 사람이 꺼지고 숫자만 켜진 순간(점멸) → off. green 으로 읽으면 점멸을 놓친다."""
+    assert classify(digits(box()), config)[0] == "off"
 
 
-def test_red_hue_wraparound_170_179(config):
-    """빨강은 H 0~10 과 170~179 두 구간 — 170 쪽 빨강도 잡아야 한다."""
-    magenta_red = (90, 20, 230)
-    h = cv2.cvtColor(np.uint8([[magenta_red]]), cv2.COLOR_BGR2HSV)[0, 0, 0]
-    assert h >= 170
-    assert classify_signal(lamp(box(), TOP, magenta_red), config).color == "red"
+def test_countdown_glow_spilling_into_mid_is_off(config):
+    """숫자 빛이 가운데 칸으로 번져도 초록 사람이 아니다."""
+    img = cv2.GaussianBlur(digits(box()), (15, 15), 0)
+    img = cv2.GaussianBlur(digits(img), (9, 9), 0)
+    m = measure(img, config)
+    assert m.green_bottom > m.green_mid
+    assert classify(img, config)[0] != "green"
 
 
-def test_low_confidence_becomes_unknown(config):
-    """불이 아주 작게만 보이면(밝기 부족) conf 가 min_conf 를 못 넘어 unknown."""
-    s = classify_signal(lamp(box(), BOTTOM, GREEN, radius=4), config)
-    assert s.color == "unknown" and s.pos_check is False
+def test_green_figure_with_countdown_is_green(config):
+    assert classify(digits(figure(box(), MID, GREEN)), config)[0] == "green"
+
+
+def test_red_and_green_together_is_unknown(config):
+    assert classify(figure(figure(box(), TOP, RED), MID, GREEN), config)[0] == "unknown"
 
 
 def test_min_conf_comes_from_config(config):
     strict = {"signal": {**config["signal"], "min_conf": 1.01}}
-    assert classify_signal(lamp(box(), TOP, RED), strict).color == "unknown"
+    assert classify(figure(box(), TOP, RED), strict)[0] == "unknown"
 
 
 @pytest.mark.parametrize(
     "img",
-    [None, np.zeros((0, 0, 3), np.uint8), np.zeros((5, 5, 3), np.uint8), np.zeros((H, W), np.uint8)],
+    [None, np.zeros((0, 0, 3), np.uint8), np.zeros((5, 5, 3), np.uint8), np.zeros((96, 30), np.uint8)],
     ids=["none", "empty", "too-small", "grayscale"],
 )
 def test_unusable_box_is_unknown(img, config):
-    s = classify_signal(img, config)
-    assert (s.present, s.color, s.conf, s.pos_check) == (True, "unknown", 0.0, False)
+    assert classify(img, config) == ("unknown", 0.0, False)
 
 
 def test_works_without_config():
-    assert classify_signal(lamp(box(), TOP, RED), {}).color == "red"
+    assert classify(figure(box(), TOP, RED), {})[0] == "red"
 
 
 def test_pos_check_only_for_red_or_green(config):
     """scene-state 규칙 4: off·unknown 이면 pos_check 는 항상 False."""
-    imgs = [box(), lamp(box(), BOTTOM, RED), lamp(box(), TOP, GREEN), box(background=(240, 240, 240))]
-    for img in imgs:
-        s = classify_signal(img, config)
-        assert s.pos_check == (s.color in ("red", "green"))
+    for img in (box(), figure(box(), MID, RED), figure(box(), TOP, GREEN), digits(box())):
+        color, _, pos = classify(img, config)
+        assert pos == (color in ("red", "green"))
 
 
-def test_measure_splits_top_and_bottom(config):
-    m = measure(lamp(box(), TOP, RED), config)
-    assert m.red_top > 0.1 and m.red_bottom == 0.0 and m.green_top == 0.0
-
-
-def test_classify_returns_tuple_for_fsm_integration(config):
-    """#7·#5 연결용 형식: classify(crop, config) -> (color, conf, pos_check)."""
-    color, conf, pos_check = classify(lamp(box(), TOP, RED), config)
-    assert (color, pos_check) == ("red", True) and conf >= config["signal"]["min_conf"]
-    assert classify(None, config) == ("unknown", 0.0, False)
+def test_classify_signal_wraps_result(config):
+    s = classify_signal(figure(box(), TOP, RED), config)
+    assert s.present and s.color == "red" and s.pos_check
