@@ -2,7 +2,7 @@
 
 표현 계층: 검출 방법이나 HSV 값은 모른다. 상태(State)만 받는다.
 """
-
+# Issue #8 구현 확인
 from __future__ import annotations
 
 from walkaid.logic.signal_fsm import State
