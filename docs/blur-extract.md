@@ -11,6 +11,15 @@
 & "..\.venv\Scripts\python.exe" tools/extract_frames.py 출력.mp4 data/frames/<clip_id>
 ```
 
+macOS에서는 프로젝트용 가상환경을 활성화한 뒤 다음 명령으로 실행합니다.
+
+```bash
+python tools/blur.py 입력.mp4 출력.mp4
+python tools/extract_frames.py 출력.mp4 data/frames/clip01
+```
+
+위 예시의 clip01을 clips.csv의 해당 clip_id로 바꿉니다.
+
 clip_id는 clips.csv와 맞춥니다. 사진은 000001.jpg부터 순서대로 저장됩니다. 기존 출력 파일이나 비어 있지 않은 사진 폴더에는 덮어쓰지 않습니다. 출력 영상에는 오디오가 포함되지 않습니다.
 
 ## 현재 처리 방식
@@ -25,6 +34,8 @@ clip_id는 clips.csv와 맞춥니다. 사진은 000001.jpg부터 순서대로 �
 - 출력에서 영상 시각의 정수 초가 바뀔 때 한 장씩 추출합니다.
 
 ## 확인 결과와 남은 일
+
+샘플 50장의 얼굴·번호판 식별 불가 확인을 마치기 전까지 결과 영상과 사진의 팀 공유 드라이브 업로드를 보류합니다. 완료 여부는 이슈 #4에서 확인합니다.
 
 - 합성 데이터와 기존 테스트를 포함해 전체 54개 통과.
 - 실제 검수용 클립 KakaoTalk_20261108_171052960.mp4에서 원본·출력 1,210프레임 일치, 사진 41장 생성.
