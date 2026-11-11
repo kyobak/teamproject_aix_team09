@@ -8,6 +8,8 @@ fsm:
   stable_frames: 3        # 같은 색이 연속 N프레임일 때만 상태 변경 (#7)
   no_signal_sec: 2.0      # 신호등이 이 시간 이상 안 보이면 NO_SIGNAL
   frame_gap_sec: 1.0      # 프레임이 이 시간 이상 끊기면 UNKNOWN
-  blink_window_sec: 2.0
+  blink_window_sec: 2.0   # 이 시간 안에 초록↔꺼짐이 2번 이상 바뀌면 BLINK
+  arm_sec: 2.0            # 마지막 '빨간불 WAIT' 뒤 이 시간 안에 초록이 시작돼야 CROSS (도착 시 이미 초록 방지)
+  cross_hold_sec: 1.0     # CROSS 중 초록이 이 시간 넘게 안 보이면 UNKNOWN
 runtime:
   target_fps: 5

@@ -82,6 +82,9 @@ camera_source.frames() ──Frame(image, ts)──▶ Detector.detect() ──S
 - `red`·`green` 은 `pos_check=true` 일 때만 관찰로 셉니다.
 - `off` 는 `present=true` 일 때만 셉니다. 초록과 번갈아 나오면 점멸(BLINK)입니다.
 - `unknown` 은 어떤 상태로도 바꾸지 않습니다.
+- `unknown` 은 이어지던 연속 횟수를 끊습니다. 그래서 초록 사이에 `unknown` 이 끼면 CROSS 까지 다시 3프레임을 셉니다.
+- CROSS 는 WAIT(빨강 3프레임)를 본 뒤 `fsm.arm_sec`(2초) 안에 초록이 시작됐을 때만 냅니다. 도착했을 때 이미 초록이면 남은 시간을 모르므로 CROSS 를 내지 않습니다.
+- CROSS 중 초록이 `fsm.cross_hold_sec`(1초) 넘게 안 보이면 UNKNOWN 입니다. 빨간불이 `unknown` 으로만 나와도 CROSS 가 남아 있지 않게 하기 위해서입니다.
 
 ## 누가 무엇을 쓰고 읽나
 
