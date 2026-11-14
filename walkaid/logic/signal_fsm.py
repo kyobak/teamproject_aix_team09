@@ -122,6 +122,11 @@ class SignalFSM:
         if self._streak >= self.p["stable_frames"]:
             if obs == "red":
                 self.state = State.WAIT
+            elif obs == "green" and self.state == State.BLINK:
+                # 점멸 중 켜짐 구간(0.5초 안팎)에 초록이 3프레임 이어질 수 있다 → 점멸을 유지한다.
+                # 최근 blink_window_sec 동안 꺼짐이 한 번도 없을 때만 점멸이 끝난 것으로 본다.
+                if len(self._flips) < 2:
+                    self.state = State.UNKNOWN
             elif obs == "green" and self.state != State.CROSS:
                 armed = (
                     self._last_wait_red_ts is not None
