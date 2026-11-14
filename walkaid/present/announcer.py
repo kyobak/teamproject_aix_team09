@@ -135,6 +135,7 @@ class Announcer:
         self._pending: tuple[int, Delivery] | None = None
         self._gen = 0  # 새 안내가 들어올 때마다 1 증가. 말하는 중인 안내의 번호와 다르면 끊는다
         self._closed = False
+        self._busy = False  # worker 가 지금 진동·음성을 내는 중인가
         self._thread: threading.Thread | None = None
         if speaker is not None or vibrator is not None:
             self._thread = threading.Thread(target=self._run, name="announcer", daemon=True)
@@ -151,8 +152,18 @@ class Announcer:
             with self._cond:
                 self._gen += 1
                 self._pending = (self._gen, delivery)  # 밀려 있던 옛 안내는 덮어써서 버린다
-                self._cond.notify()
+                self._cond.notify_all()
         return MESSAGES[state]
+
+    def wait_idle(self, timeout: float = 5.0) -> bool:
+        """기다리는 안내가 없고 지금 말하는 것도 끝날 때까지 기다린다 (#34). 시간 안에 끝나면 True.
+
+        영상 파일 끝에서 close() 를 바로 부르면 마지막 안내가 잘리므로, 그 전에 부른다.
+        """
+        if self._thread is None:
+            return True
+        with self._cond:
+            return self._cond.wait_for(lambda: self._pending is None and not self._busy, timeout)
 
     def close(self, timeout: float = 2.0) -> None:
         """worker 를 멈춘다. 말하던 것도 끊는다."""
@@ -161,7 +172,7 @@ class Announcer:
         with self._cond:
             self._closed = True
             self._gen += 1
-            self._cond.notify()
+            self._cond.notify_all()
         self._thread.join(timeout)
 
     def _run(self) -> None:
@@ -173,12 +184,18 @@ class Announcer:
                     return
                 gen, delivery = self._pending
                 self._pending = None
+                self._busy = True
 
             def stale(gen: int = gen) -> bool:
                 return self._gen != gen
 
-            delivery.started_at = time.monotonic()
-            if self._vibrator is not None:
-                self._vibrator.vibrate(VIBRATIONS[delivery.state])
-            if self._speaker is not None and not stale():
-                self._speaker.say(MESSAGES[delivery.state], stale)
+            try:
+                delivery.started_at = time.monotonic()
+                if self._vibrator is not None:
+                    self._vibrator.vibrate(VIBRATIONS[delivery.state])
+                if self._speaker is not None and not stale():
+                    self._speaker.say(MESSAGES[delivery.state], stale)
+            finally:
+                with self._cond:
+                    self._busy = False
+                    self._cond.notify_all()

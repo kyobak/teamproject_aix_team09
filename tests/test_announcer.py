@@ -148,3 +148,19 @@ def test_close_stops_worker():
     a.close()
     assert time.monotonic() - t0 < 0.5
     assert speaker.interrupted == [MESSAGES[State.WAIT]]
+
+
+def test_wait_idle_waits_until_last_speech_finishes():
+    """#34: 영상이 끝나도 마지막 안내를 끝까지 말한다."""
+    speaker = FakeSpeaker(speak_sec=0.3)
+    a = Announcer(speaker=speaker)
+    try:
+        a.announce(State.WAIT)
+        assert a.wait_idle(timeout=2.0)
+        assert speaker.finished == [MESSAGES[State.WAIT]]
+    finally:
+        a.close()
+
+
+def test_wait_idle_without_worker_returns_immediately():
+    assert Announcer().wait_idle(timeout=0.1)
