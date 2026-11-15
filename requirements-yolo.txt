@@ -1,0 +1,3 @@
+# D1 선택 설치. D0의 공통 환경은 requirements.txt를 유지한다.
+-r requirements.txt
+ultralytics==8.4.213
