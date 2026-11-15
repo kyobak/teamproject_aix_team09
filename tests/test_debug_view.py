@@ -6,6 +6,7 @@ CI 에는 화면이 없으므로 창을 띄우지 않고, 그린 이미지(rende
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 import numpy as np
@@ -80,7 +81,7 @@ class FakeView:
 def test_main_view_shows_every_frame_and_closes(tmp_path: Path, monkeypatch):
     view = FakeView()
     monkeypatch.setattr(main, "DebugView", lambda: view)
-    said = main.run(str(make(tmp_path / "s.mp4")), view=True, max_frames=5)
+    said = main.run(str(make(tmp_path / "s.mp4")), view=True, max_frames=5, realtime=False)
     assert said == ["신호등이 보이지 않습니다"]  # 화면을 켜도 안내는 그대로
     assert len(view.shown) == 5
     assert view.closed
@@ -89,6 +90,16 @@ def test_main_view_shows_every_frame_and_closes(tmp_path: Path, monkeypatch):
 def test_main_view_stops_when_user_quits(tmp_path: Path, monkeypatch):
     view = FakeView(stop_after=2)
     monkeypatch.setattr(main, "DebugView", lambda: view)
-    main.run(str(make(tmp_path / "s.mp4")), view=True)
+    main.run(str(make(tmp_path / "s.mp4")), view=True, realtime=False)
     assert len(view.shown) == 2
     assert view.closed
+
+
+def test_main_view_plays_video_file_in_realtime(tmp_path: Path, monkeypatch):
+    """시연 화면을 켜면 영상 파일도 실제 속도로 지나간다 (#34 의 재생 방식을 그대로 씀)."""
+    view = FakeView()
+    monkeypatch.setattr(main, "DebugView", lambda: view)
+    t0 = time.monotonic()
+    main.run(str(make(tmp_path / "s.mp4")), view=True, max_frames=6)  # 5fps 로 6장 = 영상 속 1.0초
+    assert time.monotonic() - t0 >= 0.9  # 처리만 하면 0.1초도 안 걸림
+    assert len(view.shown) == 6

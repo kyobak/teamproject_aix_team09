@@ -85,28 +85,15 @@ def render(image: np.ndarray, scene: SceneState, state: State, box: Box | None =
 
 
 class DebugView:
-    """창에 띄운다. 영상 파일은 영상 안의 시각에 맞춰 천천히 보여 준다(파일은 실제보다 빨리 읽히기 때문)."""
+    """창에 띄운다. 영상 파일을 실제 속도로 보여 주는 것은 main 이 맡는다(#34)."""
 
-    def __init__(self, realtime: bool = True) -> None:
+    def __init__(self) -> None:
         self.fps = FpsMeter()
-        self.realtime = realtime
-        self._start: tuple[float, float] | None = None  # (첫 프레임 ts, 그때 컴퓨터 시각)
 
     def show(self, image: np.ndarray, scene: SceneState, state: State, box: Box | None = None) -> bool:
         """한 프레임을 그린다. 사용자가 q 또는 Esc 를 누르면 False."""
-        if self.realtime:
-            self._wait_for(scene.ts)
         cv2.imshow(WINDOW, render(image, scene, state, box, self.fps.tick()))
         return cv2.waitKey(1) & 0xFF not in (ord("q"), 27)
-
-    def _wait_for(self, ts: float) -> None:
-        now = time.monotonic()
-        if self._start is None:
-            self._start = (ts, now)
-            return
-        delay = self._start[1] + (ts - self._start[0]) - now
-        if delay > 0:
-            time.sleep(min(delay, 1.0))
 
     def close(self) -> None:
         cv2.destroyWindow(WINDOW)
