@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import pytest
 
-from tools.blur import blur_regions, blur_video, detect_regions
+from tools.blur import blur_regions, blur_video, detect_regions, load_detectors
 from tools.extract_frames import extract_frames
 from tools.make_sample_video import make
 from walkaid.io.camera_source import frames
@@ -17,7 +17,7 @@ def test_blur_preserves_frame_count_and_unselected_pixels(tmp_path: Path, monkey
     monkeypatch.setattr("tools.blur.detect_regions", lambda image, detectors: set())
     source = make(tmp_path / "source.mp4")
     destination = tmp_path / "blurred.mp4"
-    assert blur_video(source, destination) == 30
+    assert blur_video(source, destination, haar_only=True) == 30
     source_frames = list(frames(str(source)))
     output_frames = list(frames(str(destination)))
     assert len(source_frames) == len(output_frames) == 30
@@ -54,7 +54,7 @@ def test_extracts_three_images_from_three_seconds(tmp_path: Path):
     blurred = tmp_path / "blurred.mp4"
     destination = tmp_path / "frames"
 
-    blur_video(source, blurred)
+    blur_video(source, blurred, haar_only=True)
 
     assert extract_frames(blurred, destination) == 3
     assert sorted(path.name for path in destination.iterdir()) == [
@@ -92,3 +92,17 @@ def test_extraction_does_not_overwrite_existing_files(tmp_path: Path):
         extract_frames(source, destination)
 
     assert existing.read_text(encoding="utf-8") == "keep"
+
+
+def test_load_detectors_from_korean_path(tmp_path: Path, monkeypatch):
+    directory = tmp_path / "한글 검출기"
+    directory.mkdir()
+    original = Path(cv2.data.haarcascades)
+    for filename in ("haarcascade_frontalface_default.xml", "haarcascade_russian_plate_number.xml"):
+        (directory / filename).write_bytes((original / filename).read_bytes())
+    monkeypatch.setattr(cv2.data, "haarcascades", str(directory))
+    detectors = load_detectors()
+    assert len(detectors) == 2
+    assert all(not detector.empty() for detector in detectors)
+    gray = np.zeros((100, 100), dtype=np.uint8)
+    assert all(len(detector.detectMultiScale(gray)) == 0 for detector in detectors)
