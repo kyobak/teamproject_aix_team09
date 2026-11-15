@@ -217,3 +217,19 @@ def test_works_without_config():
     f = Feeder(config={})
     f.feed("red", "red", "red")
     assert f.feed("green", "green", "green") == State.CROSS
+
+
+def test_blink_does_not_flicker_on_three_green_frames(f):
+    """실제 점멸(1초 주기, 켜짐 0.6초)은 5fps 에서 초록 3프레임 + 꺼짐 2프레임 → BLINK 가 흔들리면 안 된다."""
+    f.feed("red", "red", "red", "green", "green", "green")  # CROSS
+    f.feed(*["green", "green", "green", "off", "off"] * 5)
+    start = f.states.index(State.BLINK)
+    assert all(st == State.BLINK for st in f.states[start:])
+
+
+def test_steady_green_after_blink_is_unknown(f):
+    f.feed("red", "red", "red", "green", "green", "green")
+    f.feed(*["off", "green", "green", "green"] * 2)
+    assert f.fsm.state == State.BLINK
+    f.feed(*["green"] * 12)  # 2.4초 동안 꺼짐 없음
+    assert f.fsm.state == State.UNKNOWN
