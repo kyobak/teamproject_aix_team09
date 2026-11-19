@@ -25,6 +25,12 @@
 **위치**: 판정한 박스의 중심이 정답 박스 근처(가로 ±0.5칸 폭, 세로 ±0.25칸 높이)에 있어야 맞힌 것으로 셉니다.
 색이 맞아도 다른 신호등을 보고 맞힌 것은 틀린 것입니다.
 
+**재현**: 정답은 `data/labels/signal_eval_gt.json`(영상 파일명·장소·조명·1초마다 상태와 박스), 채점은 `tools/eval_signal.py`. 영상 폴더만 주면 D0·D1·D2 를 같은 규칙으로 잽니다.
+
+```bash
+python tools/eval_signal.py --videos data/phone --detector d0
+```
+
 ## 2. D0 결과 요약
 
 | 정답 | 프레임 수 | 맞힘 | 정답률 |
