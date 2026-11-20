@@ -10,6 +10,7 @@ from walkaid.io.config import load_config
 from walkaid.logic.detector import make_detector
 from walkaid.logic.signal_fsm import SignalFSM
 from walkaid.present.announcer import Announcer
+from walkaid.present.debug_view import DebugView
 
 
 def run(
@@ -18,24 +19,29 @@ def run(
     tts: bool = False,
     max_frames: int | None = None,
     realtime: bool | None = None,
+    view: bool = False,
 ) -> list[str]:
     """영상 → 판단 → 안내.
 
-    realtime: 영상 파일을 실제 속도로 재생할지 (#34). None 이면 '음성을 켜고 영상 파일을 넣었을 때'만 켠다.
-    영상 파일은 실제보다 훨씬 빨리 처리되므로, 실제 속도로 맞추지 않으면 안내가 서로 덮어써서 끊긴다.
-    웹캠은 원래 실제 속도라 맞출 필요가 없다.
+    realtime: 영상 파일을 실제 속도로 재생할지 (#34). None 이면 '음성이나 시연 화면을 켜고
+    영상 파일을 넣었을 때'만 켠다.
+    영상 파일은 실제보다 훨씬 빨리 처리되므로, 실제 속도로 맞추지 않으면 안내가 서로 덮어써서 끊기고
+    시연 화면도 눈으로 볼 수 없을 만큼 빨리 지나간다. 웹캠은 원래 실제 속도라 맞출 필요가 없다.
+    view: 시연용 디버그 화면을 띄울지 (#10). 창에서 q 또는 Esc 를 누르면 멈춘다.
     """
     config = load_config()
     detector = make_detector(detector_name, config)
     fsm = SignalFSM(config)
     announcer = Announcer(use_tts=tts)
+    debug_view = DebugView() if view else None
     if realtime is None:
-        realtime = tts and not source.isdigit()
+        realtime = (tts or view) and not source.isdigit()
     said: list[str] = []
     start_wall: float | None = None
     start_ts = 0.0
+    stream = frames(source, max_fps=config["runtime"]["target_fps"])
     try:
-        for i, frame in enumerate(frames(source, max_fps=config["runtime"]["target_fps"])):
+        for i, frame in enumerate(stream):
             if max_frames is not None and i >= max_frames:
                 break
             if realtime:
@@ -50,9 +56,17 @@ def run(
             if text:
                 print(f"[{frame.ts:6.2f}s] {state.value}: {text}")
                 said.append(text)
+            # 박스는 SceneState 에 없으므로 검출기의 디버그용 값을 넘긴다 (없는 검출기면 None)
+            if debug_view is not None and not debug_view.show(
+                frame.image, scene, state, getattr(detector, "last_box", None)
+            ):
+                break  # 창에서 q / Esc
         announcer.wait_idle()  # 마지막 안내를 끝까지 말한 뒤 끝낸다
     finally:
+        stream.close()
         announcer.close()
+        if debug_view is not None:
+            debug_view.close()
     return said
 
 
@@ -61,8 +75,9 @@ def main() -> None:
     p.add_argument("--source", required=True, help="영상 파일 경로 또는 웹캠 번호(예: 0)")
     p.add_argument("--detector", default="d0", choices=["d0", "d1", "d2"])
     p.add_argument("--tts", action="store_true", help="음성으로 안내")
+    p.add_argument("--view", action="store_true", help="시연용 디버그 화면 (q 또는 Esc 로 종료)")
     args = p.parse_args()
-    run(args.source, args.detector, args.tts)
+    run(args.source, args.detector, args.tts, view=args.view)
 
 
 if __name__ == "__main__":
