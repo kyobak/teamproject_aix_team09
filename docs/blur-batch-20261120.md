@@ -10,7 +10,7 @@
 
 ## Drive 영상 20개: 파일별 처리 버전
 
-[videos_blurred](https://drive.google.com/drive/folders/1dNp-GxfVsmov4Tm68wuoeeN2JR-Xg4Si)의 2026-11-20 리뷰 대응 시점 목록입니다. 이번 배치 출력과 파일명·크기·업로드 ID를 대조했습니다. 파일명만으로 처리 버전을 추정하지 않았습니다.
+[videos_blurred](https://drive.google.com/drive/folders/1dNp-GxfVsmov4Tm68wuoeeN2JR-Xg4Si)의 2026-11-20 리뷰 대응 시점 목록입니다. 이번 배치의 4개는 파일명·크기·업로드 ID를 대조했습니다. 기존 IMG 16개는 2026-11-20 사용자가 동일한 Haar 제거 버전으로 처리했다고 추가 확인했습니다. 파일명만으로 처리 버전을 추정하지 않았습니다.
 
 | Drive 파일 | 처리 버전 | 확인 범위 |
 |---|---|---|
@@ -18,24 +18,24 @@
 | [_talkv_dJMcazxWULn_q5JK7HHJf2A2859coJMsKK_talkv_high_yunet.mp4](https://drive.google.com/file/d/19jGcV_87O69uZCYEUx9AvUGiyImX47z8/view?usp=drivesdk) | PR #39 / `5680c60` / YuNet 단독 | 로컬 처리 기록·업로드 ID·파일 크기 일치 |
 | [_talkv_dJMcawnBzW6_8OfKdQnyPi9KrIiffDBAZK_talkv_high_yunet.mp4](https://drive.google.com/file/d/1CflwjcsKN2zp2pAAOCzMPpU_cnUbNOW9/view?usp=drivesdk) | PR #39 / `5680c60` / YuNet 단독 | 로컬 처리 기록·업로드 ID·파일 크기 일치 |
 | [_talkv_dJMcanK2R2l_ukYYaHCHPELj2DfJc1NKBK_talkv_high_yunet.mp4](https://drive.google.com/file/d/1t63VhldWiWoBEo2w5JgbC3SK5UPC07za/view?usp=drivesdk) | PR #39 / `5680c60` / YuNet 단독 | 로컬 처리 기록·업로드 ID·파일 크기 일치 |
-| [IMG_6984_blurred.mp4](https://drive.google.com/file/d/1UVomM0ifEJYbGzZNUTBAyJqvCFLO6Pjv/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6983_blurred.mp4](https://drive.google.com/file/d/1OsXA2sFvOXs9u8AowiHEVJXbPedXv_oz/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6982_blurred.mp4](https://drive.google.com/file/d/1r__RqoXimE9QC2mKIo8KtfFIEhGc0MXy/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6981_blurred.mp4](https://drive.google.com/file/d/1OF_cNQGF7G1izsAl5BaVTDCqVlzGP9it/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6980_blurred.mp4](https://drive.google.com/file/d/1xK0ZwBdrTpZLzRXCfZ295q_e2BHXb6GO/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6979_blurred.mp4](https://drive.google.com/file/d/1ckhjs5XLcKXTrbYbgnxbGejjZttCpK0T/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6978_blurred.mp4](https://drive.google.com/file/d/1FHcVPtpH4MnPKeYiy5jG6V-E5984icAr/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6977_blurred.mp4](https://drive.google.com/file/d/1-Jp2NSQUVo9f1WLQFQDFS-mMQuqX5wTB/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6976_blurred.mp4](https://drive.google.com/file/d/1JjUlIBX1Zd2J1g4DjPRmqQUXfqbdcawB/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6975_blurred.mp4](https://drive.google.com/file/d/1K5w_2O6lT-us5MtHh0aB2QqwN-JZ_Fc7/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6973_blurred.mp4](https://drive.google.com/file/d/1Of6ca6Br11vIeX4ZQHiWysOAd4pesaOa/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6972_blurred.mp4](https://drive.google.com/file/d/1cFgOtQxatA6eWKN4PQrVSjJzwk_G2_Te/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6971_blurred.mp4](https://drive.google.com/file/d/1qwX0blaPAr4Zlh0lKvnsiamq67cvnoIt/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6970_blurred.mp4](https://drive.google.com/file/d/1nsTW8ejC-Y4vjPdP4W4koHWjZqW5QJKt/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6968_blurred.mp4](https://drive.google.com/file/d/1EmOEizWFiCoG4qIJzrBgk45_d9HX_Xj_/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
-| [IMG_6967_blurred.mp4](https://drive.google.com/file/d/1bMrLVudXLVZpoS3zqn99jDEvDSv8Ywug/view?usp=drivesdk) | **미확인** | 처리자의 코드 버전/커밋 확인 필요; main 사용 여부도 미확인 |
+| [IMG_6984_blurred.mp4](https://drive.google.com/file/d/1UVomM0ifEJYbGzZNUTBAyJqvCFLO6Pjv/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6983_blurred.mp4](https://drive.google.com/file/d/1OsXA2sFvOXs9u8AowiHEVJXbPedXv_oz/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6982_blurred.mp4](https://drive.google.com/file/d/1r__RqoXimE9QC2mKIo8KtfFIEhGc0MXy/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6981_blurred.mp4](https://drive.google.com/file/d/1OF_cNQGF7G1izsAl5BaVTDCqVlzGP9it/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6980_blurred.mp4](https://drive.google.com/file/d/1xK0ZwBdrTpZLzRXCfZ295q_e2BHXb6GO/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6979_blurred.mp4](https://drive.google.com/file/d/1ckhjs5XLcKXTrbYbgnxbGejjZttCpK0T/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6978_blurred.mp4](https://drive.google.com/file/d/1FHcVPtpH4MnPKeYiy5jG6V-E5984icAr/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6977_blurred.mp4](https://drive.google.com/file/d/1-Jp2NSQUVo9f1WLQFQDFS-mMQuqX5wTB/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6976_blurred.mp4](https://drive.google.com/file/d/1JjUlIBX1Zd2J1g4DjPRmqQUXfqbdcawB/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6975_blurred.mp4](https://drive.google.com/file/d/1K5w_2O6lT-us5MtHh0aB2QqwN-JZ_Fc7/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6973_blurred.mp4](https://drive.google.com/file/d/1Of6ca6Br11vIeX4ZQHiWysOAd4pesaOa/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6972_blurred.mp4](https://drive.google.com/file/d/1cFgOtQxatA6eWKN4PQrVSjJzwk_G2_Te/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6971_blurred.mp4](https://drive.google.com/file/d/1qwX0blaPAr4Zlh0lKvnsiamq67cvnoIt/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6970_blurred.mp4](https://drive.google.com/file/d/1nsTW8ejC-Y4vjPdP4W4koHWjZqW5QJKt/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6968_blurred.mp4](https://drive.google.com/file/d/1EmOEizWFiCoG4qIJzrBgk45_d9HX_Xj_/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
+| [IMG_6967_blurred.mp4](https://drive.google.com/file/d/1bMrLVudXLVZpoS3zqn99jDEvDSv8Ywug/view?usp=drivesdk) | YuNet 단독 / Haar 제거 (사용자 확인) | 정확한 커밋·실행 로그는 별도 미확인 |
 
-기존 `IMG_...` 16개는 이 배치에서 만든 파일이 아닙니다. main 또는 PR #39 처리본으로 단정할 근거가 없으므로 처리자 확인이 필요합니다. 이번 배치 나머지 20개는 로컬 처리 완료이며 위 조회 시점에는 Drive 목록에 없었습니다.
+기존 `IMG_...` 16개는 이 배치에서 만든 파일은 아니지만, 사용자가 이번 카톡 24개와 같은 Haar 제거 버전으로 처리했다고 확인했습니다. 따라서 총 40개의 처리 방식은 YuNet 단독이며 번호판 자동 가림이 없습니다. 기존 16개의 정확한 커밋 번호·추론 설정·실행 로그까지 확인된 것은 아니므로 `5680c60`으로 단정하지 않습니다. 이번 배치 나머지 20개는 로컬 처리 완료이며 위 조회 시점에는 Drive 목록에 없었습니다.
 
 ## 이번 카톡 영상 24개: 신호 비교
 
@@ -70,7 +70,7 @@
 
 신호 기준 14개 통과 / 10개 미달. 미달 중 3개에서 위험 방향 차이가 있었으며, 전체 비교에서 원본 red→결과 green 226프레임, 결과에서만 CROSS 259프레임입니다. 두 종류는 같은 프레임에서 겹칠 수 있으므로 합쳐서 고유 프레임 수로 해석하지 않습니다.
 
-신호 기준 미달 10개는 가림 영역·재인코딩 등 원인을 추가 확인할 대상으로 남깁니다. 담당자 개인정보 전수 검수와 신호 기준 확인이 끝나지 않은 상태를 라벨링 준비 완료로 표시하지 않습니다. 기존 Drive 16개도 처리 버전·검수 범위를 확인해야 합니다.
+신호 기준 미달 10개는 가림 영역·재인코딩 등 원인을 추가 확인할 대상으로 남깁니다. 담당자 개인정보 전수 검수와 신호 기준 확인이 끝나지 않은 상태를 라벨링 준비 완료로 표시하지 않습니다. 기존 Drive 16개는 Haar 제거 방식이라는 사용자 확인을 반영했으며, 개인정보 검수 범위와 신호 비교 결과는 별도로 확인해야 합니다.
 
 사진 검수 중 얼굴·번호판이 식별되는 프레임은 `frames/_reject/<clip_id>/`로 이동하고 원래 파일명·사유를 강태혁에게 공유합니다. 클립의 최초 사진 수 대비 고유 제외 사진이 10%를 초과하면 클립 전체를 보류합니다. 상세 절차는 [라벨링 가이드](labeling-guide.md#cvat-업로드-전-얼굴번호판-검수)를 따릅니다.
 
