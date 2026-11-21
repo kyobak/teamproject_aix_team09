@@ -151,25 +151,6 @@
 - 버린 이유: SceneState 변경은 팀 전체 합의가 필요해 D0 의 디버그용 `last_box` 를 main 이 넘기도록 함 / 별도 실행 파일은 실제 프로그램과 시연 화면이 달라질 수 있음 / #34 가 main.py 에 실제 속도 재생을 먼저 넣어서 중복을 없애고 그것을 그대로 씀
 - 검증: pytest 340 passed, ruff 통과, Windows 노트북에서 샘플 영상으로 창·상태 띠·fps 표시 확인
 
-### [저장소 초기화] 박재원 · 2026-10-28
- 
- - 무엇을 하려고: 초기 파일, 실행 환경, 이슈, 브랜치 규칙을 한 번에 세팅
- - 프롬프트 원문: "https://github.com/kyobak/teamproject_aix_team09.git it's our git repository and let me know if I missed something from " ① 착수 점검표 / Start checklist … "
- - 쓴 것: 폴더 뼈대(`walkaid/`), `requirements*.txt`, `tools/check_env.py`, CI, PR 템플릿, CONTRIBUTING.md, 이슈 16개
- - 버린 것: 최상위 폴더 이름 `io/`
- - 버린 이유: 파이썬 표준 라이브러리 `io` 와 이름이 겹쳐 import 가 깨짐 → `walkaid/io/` 로 옮김
-
-### [#7] 박재원 · 2026-11-09
- 
- - 무엇을 하려고: 상태 머신(`signal_fsm.py`)과 테스트 초안
- - 프롬프트 원문: let's handle the #7, let me know about what I lost it(which is important about this task) and answer in Korean
- - 쓴 것: 연속 3프레임 확인, '직전 WAIT' 조건(`arm_sec`), 점멸 감지, CROSS 유지 조건(`cross_hold_sec`), 무작위 순서 안전 테스트
- - 버린 것: `unknown` 프레임이 오면 상태를 그대로 두는 방식(CROSS 포함)
- - 버린 이유: D0 가 빨간불의 11% 를 `unknown` 으로 내므로, CROSS 중 실제로 빨간불이 돼도 `unknown` 만 나오면 CROSS 가 계속 남는다 → CROSS 는 초록이 계속 보일 때만 유지
- - 버린 것: SceneState 에 박스 필드 추가 / main.py 를 건드리지 않는 별도 시연 실행 파일 / DebugView 안에서 따로 재생 속도 맞추기
- - 버린 이유: SceneState 변경은 팀 전체 합의가 필요해 D0 의 디버그용 `last_box` 를 main 이 넘기도록 함 / 별도 실행 파일은 실제 프로그램과 시연 화면이 달라질 수 있음 / #34 가 main.py 에 실제 속도 재생을 먼저 넣어서 중복을 없애고 그것을 그대로 씀
- - 검증: pytest 340 passed, ruff 통과, Windows 노트북에서 샘플 영상으로 창·상태 띠·fps 표시 확인
-
 ### [#11 데이터 기록] 박재원 · 2026-11-21
 
 - 무엇을 하려고: 원본·블러본·사진·라벨의 보관 위치와 삭제 시점, 블러 검수 규칙을 `ETHICS.md` 에 기록 (#38 리뷰 [ask], #40 리뷰 반영)
