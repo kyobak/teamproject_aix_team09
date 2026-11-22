@@ -1,4 +1,4 @@
-"""Haar와 YuNet으로 얼굴·번호판을 찾아 넓게 흐린다."""
+"""YuNet으로 얼굴을 찾아 넓게 흐린다. 번호판은 자동 검출하지 않는다."""
 
 from __future__ import annotations
 
@@ -13,21 +13,6 @@ import cv2
 import numpy as np
 
 DEFAULT_YUNET_MODEL = Path(__file__).resolve().parents[1] / "models" / "face_detection_yunet_2023mar.onnx"
-
-
-def load_detectors():
-    detectors = []
-    for filename in ("haarcascade_frontalface_default.xml", "haarcascade_russian_plate_number.xml"):
-        xml = (Path(cv2.data.haarcascades) / filename).read_text(encoding="utf-8")
-        storage = cv2.FileStorage(xml, cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY)
-        try:
-            detector = cv2.CascadeClassifier()
-            if not detector.read(storage.getFirstTopLevelNode()) or detector.empty():
-                raise RuntimeError(f"검출기를 열 수 없습니다: {filename}")
-        finally:
-            storage.release()
-        detectors.append(detector)
-    return detectors
 
 
 def load_yunet(model_path: Path = DEFAULT_YUNET_MODEL, score_threshold: float = 0.75):
@@ -55,20 +40,6 @@ def expanded_region(x, y, width, height, image_width, image_height):
     if left >= right or top >= bottom:
         return None
     return left, top, right, bottom
-
-
-def detect_regions(image, detectors):
-    scale = 1.5
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = cv2.equalizeHist(cv2.resize(gray, None, fx=scale, fy=scale))
-    height, width = image.shape[:2]
-    regions = set()
-    for detector in detectors:
-        for x, y, w, h in detector.detectMultiScale(gray, scaleFactor=1.08, minNeighbors=50):
-            region = expanded_region(x / scale, y / scale, w / scale, h / scale, width, height)
-            if region is not None:
-                regions.add(region)
-    return regions
 
 
 def detect_yunet_regions(image, detector):
@@ -99,10 +70,9 @@ def blur_video(
     *,
     yunet_model: Path = DEFAULT_YUNET_MODEL,
     score_threshold: float = 0.75,
-    haar_only: bool = False,
     protected_regions=(),
 ) -> int:
-    """매 프레임에서 두 얼굴 검출기의 결과와 Haar 번호판 결과를 합친다."""
+    """YuNet 얼굴 후보와 직전 두 프레임의 후보를 흐린 영상을 저장한다."""
     project_root = Path(__file__).resolve().parents[1]
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
@@ -126,8 +96,7 @@ def blur_video(
     if not math.isfinite(fps) or fps <= 0:
         raise ValueError("영상의 FPS를 읽을 수 없습니다.")
 
-    detectors = load_detectors()
-    yunet = None if haar_only else load_yunet(yunet_model, score_threshold)
+    yunet = load_yunet(yunet_model, score_threshold)
     destination.parent.mkdir(parents=True, exist_ok=True)
     recent = deque(maxlen=3)
     writer = None
@@ -141,9 +110,7 @@ def blur_video(
                     writer = cv2.VideoWriter(str(destination), cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
                     if not writer.isOpened():
                         raise RuntimeError("출력 영상을 만들 수 없습니다.")
-                regions = detect_regions(image, detectors)
-                if yunet is not None:
-                    regions.update(detect_yunet_regions(image, yunet))
+                regions = detect_yunet_regions(image, yunet)
                 recent.append(regions)
                 blur_regions(image, set().union(*recent))
                 # 사용자 지정 신호등 영역은 흐림 전에 읽은 원본 픽셀로 복원한다.
@@ -167,7 +134,6 @@ def main():
     parser.add_argument("destination", type=Path)
     parser.add_argument("--yunet-model", type=Path, default=DEFAULT_YUNET_MODEL)
     parser.add_argument("--score-threshold", type=float, default=0.75)
-    parser.add_argument("--haar-only", action="store_true", help="비교를 위해 기존 Haar만 사용")
     parser.add_argument(
         "--protect",
         type=float,
@@ -183,7 +149,6 @@ def main():
         args.destination,
         yunet_model=args.yunet_model,
         score_threshold=args.score_threshold,
-        haar_only=args.haar_only,
         protected_regions=args.protect,
     )
     print(f"완료: {count}프레임 → {args.destination}")

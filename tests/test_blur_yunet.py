@@ -1,5 +1,6 @@
 """YuNet은 합성 데이터와 모의 검출기로 검증한다. 모델 다운로드가 없어도 실행한다."""
 
+import sys
 from pathlib import Path
 
 import cv2
@@ -11,7 +12,7 @@ from tools.make_sample_video import make
 from walkaid.io.camera_source import frames
 
 
-def test_yunet_resizes_input_and_combines_with_haar(tmp_path: Path, monkeypatch):
+def test_yunet_resizes_input_and_keeps_recent_faces_without_haar(tmp_path: Path, monkeypatch):
     source = tmp_path / "pattern.mp4"
     destination = tmp_path / "combined.mp4"
     rows, columns = np.indices((240, 320))
@@ -31,13 +32,18 @@ def test_yunet_resizes_input_and_combines_with_haar(tmp_path: Path, monkeypatch)
             self.sizes.append(size)
 
         def detect(self, image):
-            return 1, np.array([[240, 20, 20, 20, *([0] * 10), 0.95]], dtype=np.float32)
+            faces = [[240, 20, 20, 20, *([0] * 10), 0.95]]
+            if len(self.sizes) == 1:
+                faces.append([20, 20, 20, 20, *([0] * 10), 0.95])
+            return 1, np.array(faces, dtype=np.float32)
 
     yunet = YuNet()
     monkeypatch.setattr(blur, "load_yunet", lambda path, threshold: yunet)
-    monkeypatch.setattr(blur, "load_detectors", lambda: [])
-    candidates = iter([{(0, 0, 50, 50)}, set(), set(), set()])
-    monkeypatch.setattr(blur, "detect_regions", lambda image, detectors: next(candidates))
+
+    def reject_haar(*args, **kwargs):
+        pytest.fail("YuNet 전용 처리에서 Haar 검출기를 생성하면 안 됩니다.")
+
+    monkeypatch.setattr(cv2, "CascadeClassifier", reject_haar)
     recorded = []
     apply_blur = blur.blur_regions
 
@@ -48,8 +54,8 @@ def test_yunet_resizes_input_and_combines_with_haar(tmp_path: Path, monkeypatch)
     monkeypatch.setattr(blur, "blur_regions", record_blur)
     assert blur.blur_video(source, destination, protected_regions=[(0, 0, 0.25, 0.5)]) == 4
     assert yunet.sizes == [(320, 240)] * 4
-    # Haar와 YuNet 한쪽에서만 찾은 후보도 남기고 직전 두 프레임을 유지한다.
-    assert all(regions == {(0, 0, 50, 50), (230, 10, 270, 50)} for regions in recorded[:3])
+    # YuNet이 첫 프레임에서만 찾은 얼굴도 직전 두 프레임까지 유지한다.
+    assert all(regions == {(10, 10, 50, 50), (230, 10, 270, 50)} for regions in recorded[:3])
     assert recorded[3] == {(230, 10, 270, 50)}
     original = list(frames(str(source)))
     output = list(frames(str(destination)))
@@ -106,3 +112,11 @@ def test_missing_yunet_model_does_not_silently_fall_back(tmp_path: Path):
 def test_invalid_protection_is_rejected_before_opening_video(tmp_path: Path):
     with pytest.raises(ValueError, match="보존"):
         blur.blur_video(tmp_path / "absent.mp4", tmp_path / "out.mp4", protected_regions=[(0.9, 0, 0.1, 1)])
+
+
+def test_removed_haar_only_option_is_rejected(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["blur.py", "source.mp4", "output.mp4", "--haar-only"])
+    with pytest.raises(SystemExit) as error:
+        blur.main()
+    assert error.value.code == 2
+    assert "--haar-only" in capsys.readouterr().err

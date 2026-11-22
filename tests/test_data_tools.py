@@ -6,18 +6,29 @@ import cv2
 import numpy as np
 import pytest
 
-from tools.blur import blur_regions, blur_video, detect_regions, load_detectors
+from tools.blur import blur_regions, blur_video, expanded_region
 from tools.extract_frames import extract_frames
 from tools.make_sample_video import make
 from walkaid.io.camera_source import frames
 
 
-def test_blur_preserves_frame_count_and_unselected_pixels(tmp_path: Path, monkeypatch):
+@pytest.fixture
+def empty_yunet(monkeypatch):
+    class YuNet:
+        def setInputSize(self, size):
+            pass
+
+        def detect(self, image):
+            return 1, None
+
+    monkeypatch.setattr("tools.blur.load_yunet", lambda path, threshold: YuNet())
+
+
+def test_blur_preserves_frame_count_and_unselected_pixels(tmp_path: Path, empty_yunet):
     """후보가 없는 구간에서는 아래쪽 글자도 유지되어야 한다."""
-    monkeypatch.setattr("tools.blur.detect_regions", lambda image, detectors: set())
     source = make(tmp_path / "source.mp4")
     destination = tmp_path / "blurred.mp4"
-    assert blur_video(source, destination, haar_only=True) == 30
+    assert blur_video(source, destination) == 30
     source_frames = list(frames(str(source)))
     output_frames = list(frames(str(destination)))
     assert len(source_frames) == len(output_frames) == 30
@@ -27,20 +38,14 @@ def test_blur_preserves_frame_count_and_unselected_pixels(tmp_path: Path, monkey
         assert output.image[210:235].std() > 5
 
 
-def test_face_and_plate_boxes_expand_and_clip_at_edges():
+def test_face_boxes_expand_and_clip_at_edges():
     image = np.indices((100, 100)).sum(axis=0).astype(np.uint8) % 2 * 255
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     original = image.copy()
-
-    class Detector:
-        def __init__(self, box):
-            self.box = box
-
-        def detectMultiScale(self, gray, **kwargs):
-            assert gray.shape == (150, 150)
-            return [self.box]
-
-    regions = detect_regions(image, [Detector((0, 0, 30, 30)), Detector((120, 120, 30, 30))])
+    regions = {
+        expanded_region(0, 0, 20, 20, 100, 100),
+        expanded_region(80, 80, 20, 20, 100, 100),
+    }
     assert regions == {(0, 0, 30, 30), (70, 70, 100, 100)}
     blur_regions(image, regions)
     assert image[:30, :30].std() < 5
@@ -48,13 +53,13 @@ def test_face_and_plate_boxes_expand_and_clip_at_edges():
     assert np.array_equal(image[30:70], original[30:70])
 
 
-def test_extracts_three_images_from_three_seconds(tmp_path: Path):
+def test_extracts_three_images_from_three_seconds(tmp_path: Path, empty_yunet):
     """가림 처리한 3초 영상에서 사진 3장을 만든다."""
     source = make(tmp_path / "source.mp4")
     blurred = tmp_path / "blurred.mp4"
     destination = tmp_path / "frames"
 
-    blur_video(source, blurred, haar_only=True)
+    blur_video(source, blurred)
 
     assert extract_frames(blurred, destination) == 3
     assert sorted(path.name for path in destination.iterdir()) == [
@@ -92,17 +97,3 @@ def test_extraction_does_not_overwrite_existing_files(tmp_path: Path):
         extract_frames(source, destination)
 
     assert existing.read_text(encoding="utf-8") == "keep"
-
-
-def test_load_detectors_from_korean_path(tmp_path: Path, monkeypatch):
-    directory = tmp_path / "한글 검출기"
-    directory.mkdir()
-    original = Path(cv2.data.haarcascades)
-    for filename in ("haarcascade_frontalface_default.xml", "haarcascade_russian_plate_number.xml"):
-        (directory / filename).write_bytes((original / filename).read_bytes())
-    monkeypatch.setattr(cv2.data, "haarcascades", str(directory))
-    detectors = load_detectors()
-    assert len(detectors) == 2
-    assert all(not detector.empty() for detector in detectors)
-    gray = np.zeros((100, 100), dtype=np.uint8)
-    assert all(len(detector.detectMultiScale(gray)) == 0 for detector in detectors)
