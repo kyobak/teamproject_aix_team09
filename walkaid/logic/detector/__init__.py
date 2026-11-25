@@ -7,4 +7,8 @@ from walkaid.logic.detector.opencv_rule import OpenCVRuleDetector
 def make_detector(name: str, config: dict) -> Detector:
     if name == "d0":
         return OpenCVRuleDetector(config)
-    raise ValueError(f"아직 없는 검출기입니다: {name} (d1·d2 는 #12·#13)")
+    if name == "d1":
+        from walkaid.logic.detector.yolo import YOLODetector
+
+        return YOLODetector(config)
+    raise ValueError(f"아직 없는 검출기입니다: {name} (d2 는 #13)")
