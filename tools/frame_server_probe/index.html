@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프레임 서버 연결 검사</title>
+<h1>프레임 서버 연결 검사</h1>
+<p>카메라를 허용하면 JPEG 30장을 보내 왕복 시간과 입력 중단 후 상태를 확인합니다.</p>
+<button id="start" type="button">카메라 검사 시작</button>
+<pre id="report" aria-live="polite">대기 중</pre>
+<video id="preview" muted playsinline hidden></video>
+<script>
+const start = document.querySelector("#start");
+const report = document.querySelector("#report");
+const video = document.querySelector("#preview");
+const canvas = document.createElement("canvas");
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let stream;
+
+function stopCamera() {
+  stream?.getTracks().forEach((track) => track.stop());
+}
+window.addEventListener("pagehide", stopCamera);
+
+start.addEventListener("click", async () => {
+  start.disabled = true;
+  const times = [];
+  try {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      throw new Error("Chrome에서 인증서가 신뢰된 HTTPS 주소인지 확인하세요.");
+    }
+    const session = crypto.randomUUID();
+    const headers = { "X-Walkaid-Session": session };
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 640 }, height: { ideal: 480 } },
+    });
+    video.srcObject = stream;
+    await video.play();
+    const scale = Math.min(1, 640 / Math.max(video.videoWidth, video.videoHeight));
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    const context = canvas.getContext("2d");
+    for (let i = 0; i < 30; i++) {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const jpeg = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.75));
+      if (!jpeg) throw new Error("JPEG 변환 실패");
+      const sentAt = performance.now();
+      const response = await fetch("/api/frame", {
+        method: "POST", headers: { ...headers, "Content-Type": "image/jpeg" },
+        body: jpeg, signal: AbortSignal.timeout(1000),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "프레임 요청 실패");
+      const ms = performance.now() - sentAt;
+      times.push(ms);
+      report.textContent = `${times.length}/30장  ·  ${data.state}  ·  ${ms.toFixed(1)}ms`;
+      await pause(Math.max(0, 200 - ms));
+    }
+    stopCamera();
+    await pause(1100);
+    const response = await fetch("/api/status", { headers, signal: AbortSignal.timeout(1000) });
+    if (!response.ok) throw new Error("상태 조회 실패");
+    const { state } = await response.json();
+    const ordered = times.toSorted((a, b) => a - b);
+    const median = (ordered[14] + ordered[15]) / 2;
+    report.textContent = [
+      `${canvas.width}×${canvas.height} JPEG · 30장`,
+      `첫 응답 ${times[0].toFixed(1)}ms · 중앙값 ${median.toFixed(1)}ms · 최대 ${ordered[29].toFixed(1)}ms`,
+      `입력 중단 후 ${state} · ${state === "UNKNOWN" && ordered[29] <= 1000 ? "통과" : "확인 필요"}`,
+    ].join("\n");
+  } catch (error) {
+    report.textContent = `검사 중단 · UNKNOWN · ${error.message}`;
+  } finally {
+    stopCamera();
+    start.disabled = false;
+  }
+});
+</script>
