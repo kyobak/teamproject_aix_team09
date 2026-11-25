@@ -9,7 +9,7 @@
 ### [주제 전환] 박재원 · 2026-10-27
 
 - 무엇을 하려고: 시각장애인 보행 도우미 주제를 강의자료 흐름에 맞춰 구체화하고 기술 스택을 정함
-- 프롬프트 원문: (해당 대화의 원문을 붙여 넣으세요)
+- 프롬프트 원문: let me know the stack or technology about this topic. I need some advice from you. And please make a guideline from the lesson ai+X, answer in Korean
 - 쓴 것: 3주차 확인 계획, 7주차 아키텍처·이슈 초안, OpenCV + 라벨링 기반 구조
 - 버린 것: 빠른 판단 모델 Jev 를 판단 엔진으로 쓰는 안
 - 버린 이유: 문제가 요구하지 않는 기술을 먼저 정하면 '기술 자랑형'이 됨. Jev 는 이미지를 직접 받지 못하고 클라우드 의존이라 길 위에서 오프라인 동작이 어려움
@@ -17,7 +17,7 @@
 ### [저장소 초기화] 박재원 · 2026-10-28
 
 - 무엇을 하려고: 초기 파일, 실행 환경, 이슈, 브랜치 규칙을 한 번에 세팅
-- 프롬프트 원문: (해당 대화의 원문을 붙여 넣으세요)
+- 프롬프트 원문: "https://github.com/kyobak/teamproject_aix_team09.git it's our git repository and let me know if I missed something from " ① 착수 점검표 / Start checklist … "
 - 쓴 것: 폴더 뼈대(`walkaid/`), `requirements*.txt`, `tools/check_env.py`, CI, PR 템플릿, CONTRIBUTING.md, 이슈 16개
 - 버린 것: 최상위 폴더 이름 `io/`
 - 버린 이유: 파이썬 표준 라이브러리 `io` 와 이름이 겹쳐 import 가 깨짐 → `walkaid/io/` 로 옮김
@@ -25,7 +25,7 @@
 ### [#1] 박재원 · 2026-11-02
 
 - 무엇을 하려고: SceneState 스키마 문서와 라벨링 가이드(클래스 6개) 초안 작성
-- 프롬프트 원문: 로컬 초안 작성 (직전에 "내가 이번주에 할 이슈에 대하여 알려주고 하는 법 알려줘" 로 #1 작업 방법을 받음)
+- 프롬프트 원문: 로컬 초안 작성 (직전에 #1 작업 방법을 받음)
 - 쓴 것: `docs/scene-state.md` 의 필드 설명·검출기 규칙·상태 머신 재확인 항목, `docs/labeling-guide.md` 의 클래스 6개·박스 규칙·제외 기준·일치율 기준
 - 버린 것: 켜진 불 한 칸에만 박스를 치는 안, 점멸(`blink`)을 라벨 클래스로 두는 안
 - 버린 이유: 위·아래 위치로 색을 검증(`pos_check`)하려면 신호등 몸체 전체가 필요함. 점멸은 한 장의 사진으로 알 수 없어 상태 머신(#7)이 프레임을 이어 보고 판단해야 함
@@ -33,7 +33,7 @@
 ### [협업 규칙 보완] 박재원 · 2026-11-02
 
 - 무엇을 하려고: 브랜치·PR 진행 중 실제로 막힌 지점(작업 섞임, 번호 혼동, PR 후 rebase, PROMPTS.md 충돌)을 규칙과 GitHub 설정에 반영
-- 프롬프트 원문: 팀의 브랜치·PR 진행 방식 / 내가 팀장이기에, 합의는 굳이 필요없어.
+- 프롬프트 원문: 팀의 브랜치·PR 진행 방식
 - 쓴 것: `CONTRIBUTING.md` 1·3·5·6절 보완, PR 템플릿 안내 한 줄, main 보호(Approve 1명·CI 필수·대화 Resolve·관리자 포함)와 Squash 만 허용·머지 후 브랜치 삭제 설정
 - 버린 것: Git Flow(`develop` 브랜치), AI 기록을 PR 별 파일로 나누는 안, CODEOWNERS 리뷰 강제
 - 버린 이유: 4명·4주 프로젝트에는 브랜치가 하나 더 있으면 관리만 늘어남. 수업이 `PROMPTS.md` 한 파일을 요구함. `/.github/` 담당이 박재원 한 명이라 강제하면 본인 PR 을 아무도 승인할 수 없음
@@ -85,7 +85,7 @@
 ### [#7] 박재원 · 2026-11-09
 
 - 무엇을 하려고: 상태 머신(`signal_fsm.py`)과 테스트 초안
-- 프롬프트 원문: (해당 대화의 원문을 붙여 넣으세요)
+- 프롬프트 원문: let's handle the #7, let me know about what I lost it(which is important about this task) and answer in Korean
 - 쓴 것: 연속 3프레임 확인, '직전 WAIT' 조건(`arm_sec`), 점멸 감지, CROSS 유지 조건(`cross_hold_sec`), 무작위 순서 안전 테스트
 - 버린 것: `unknown` 프레임이 오면 상태를 그대로 두는 방식(CROSS 포함)
 - 버린 이유: D0 가 빨간불의 11% 를 `unknown` 으로 내므로, CROSS 중 실제로 빨간불이 돼도 `unknown` 만 나오면 CROSS 가 계속 남는다 → CROSS 는 초록이 계속 보일 때만 유지
@@ -151,6 +151,13 @@
 - 버린 이유: SceneState 변경은 팀 전체 합의가 필요해 D0 의 디버그용 `last_box` 를 main 이 넘기도록 함 / 별도 실행 파일은 실제 프로그램과 시연 화면이 달라질 수 있음 / #34 가 main.py 에 실제 속도 재생을 먼저 넣어서 중복을 없애고 그것을 그대로 씀
 - 검증: pytest 340 passed, ruff 통과, Windows 노트북에서 샘플 영상으로 창·상태 띠·fps 표시 확인
 
+### [#11 데이터 기록] 박재원 · 2026-11-21
+
+- 무엇을 하려고: 원본·블러본·사진·라벨의 보관 위치와 삭제 시점, 블러 검수 규칙을 `ETHICS.md` 에 기록 (#38 리뷰 [ask], #40 리뷰 반영)
+- 프롬프트 원문: I need to remove and make another ethics.md file help me with this and answer in Korean
+- 쓴 것: 2절 보관 표·저장하지 않는 것, 4절 블러 완전성 미검증, 6절 CVAT 개인 공간 전환(11-19)·업로드 전 사진 검증 규칙(11-20), 지성 리뷰(노트북 사본 삭제, 재평가 후 원본 삭제)
+- 버린 것: "평가는 블러본으로 다시 돌린다, #33에서 위험 방향 차이 0건" 이라는 초안 문장
+- 버린 이유: #33 은 영상 1개 결과였고, #39 의 24개 비교에서 3개 영상에 위험 방향 차이가 나왔음 → 근거 부족으로 정정하고 해당 3개는 라벨링·평가에서 제외
 ### [#4] tteddy03 · 2026-11-20
 
 - 요청 원문: 최근 #4의 Haar+YuNet 블러에서 Haar를 빼고 YuNet만 남겨 추가 PR. main을 다시 pull해서 작업
