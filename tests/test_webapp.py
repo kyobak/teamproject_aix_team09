@@ -41,3 +41,12 @@ def test_settings_uses_same_storage_key():
     settings = (WEBAPP / "settings.html").read_text(encoding="utf-8")
     key = re.search(r'const CONTACTS_KEY = "([^"]+)"', app).group(1)
     assert f'const KEY = "{key}"' in settings
+
+
+def test_screen_is_fully_black():
+    # 팀 결정(PR #48 리뷰): 화면에서 빛이 나오지 않게 글자·구분선·포커스 테두리까지 검정
+    html = (WEBAPP / "index.html").read_text(encoding="utf-8")
+    style = html.split("<style>")[1].split("</style>")[0]
+    colors = re.findall(r":\s*(#[0-9a-fA-F]{3,6})\b", style)
+    assert colors and set(colors) == {"#000"}
+    assert "solid" not in style  # 구분선·포커스 테두리 없음

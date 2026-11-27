@@ -259,8 +259,17 @@ bindPress($("walk"), "walk", () => (walk.running ? stopWalk(true) : startWalk())
 bindPress($("info"), "info", tellTimeAndBattery);
 bindPress($("call"), "call", nextContact, placeCall);
 
-// 화면을 벗어나면(전화 앱 열림, 홈 버튼) 카메라를 끈다. 돌아오면 다시 눌러 시작한다.
+// 화면을 벗어나면(화면 꺼짐, 전화 앱, 홈 버튼) 카메라를 끈다. 상태가 바뀔 때만 말하므로
+// 조용히 멈추면 "계속 초록불"과 구분할 수 없다 → 돌아왔을 때 멈췄다고 알린다.
+let stoppedByHide = false;
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden && walk.running) stopWalk(false);
+  if (document.hidden && walk.running) {
+    stopWalk(false);
+    stoppedByHide = true;
+  } else if (!document.hidden && stoppedByHide) {
+    stoppedByHide = false;
+    vibrate(VIBRATIONS.UNKNOWN);
+    speak("보행 안내가 멈춰 있습니다. 위를 눌러 다시 시작하세요");
+  }
 });
 window.addEventListener("pagehide", () => stopWalk(false));
