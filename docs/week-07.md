@@ -108,6 +108,42 @@ flowchart LR
 
 > MVP를 학습 없는 D0로 잡은 이유: 라벨링이 늦어져도 11주차 데모가 막히지 않게 하기 위해서입니다. 학습 모델은 **"D0보다 얼마나 나아졌나"**로 가치를 증명합니다.
 
+### 4. 아키텍처 갱신 / Update (2026-11-25, 13주차)
+
+> 7주차 설계 이후 바뀐 점. 위 1~3절은 당시 결정 기록으로 그대로 둔다.
+
+11/22 회의에서 시연 방식을 "노트북 + 웹캠"에서 **"폰 브라우저 웹앱 + 노트북 서버"**로 넓혔다. 폰이 카메라·스피커·진동을 맡고, 판단은 노트북에서 기존 파이프라인 그대로 한다.
+
+```mermaid
+flowchart LR
+  subgraph PHONE[폰 크롬 — 웹앱 #45]
+    UI[검은 화면 3분할<br/>보행 안내 / 시간·배터리 / 긴급 전화]
+    PCAM[뒷면 카메라<br/>0.2초마다 JPEG]
+    OUT[음성·진동<br/>상태가 바뀔 때만]
+  end
+  subgraph LAPTOP[노트북 — frame_server #44]
+    API["HTTPS /api/frame<br/>메모리에서만 처리"]
+    DET{Detector<br/>D0 / D1 / D2}
+    ST[[SceneState]]
+    FSM[signal_fsm]
+  end
+  PCAM -->|같은 Wi-Fi · 핫스팟| API --> DET --> ST --> FSM
+  FSM -->|상태 JSON| OUT
+  UI --> PCAM
+```
+
+| 바뀐 것 | 내용 | 바뀌지 않은 것 |
+|---|---|---|
+| 입력 | `camera_source` 외에 폰 카메라 JPEG 를 HTTPS 로 받는 `walkaid/frame_server.py` 추가 (#44) | 검출기 인터페이스, `SceneState` 스키마 |
+| 표현 | 폰 웹앱 `webapp/` 이 음성·진동을 낸다. 문구·진동 패턴은 `announcer.py` 와 같아야 하고 테스트가 검사한다 (#45) | 상태별 안내 문구와 진동 패턴 |
+| 안전 | 입력이 1초 넘게 끊기면 서버·웹앱 양쪽에서 UNKNOWN. 다른 폰 세션은 기존 입력이 끊긴 뒤에만 시작 → 상태 머신이 처음부터 다시 봐야 CROSS | `signal_fsm.py` (한 줄도 안 바뀜) |
+| 검출기 | D1(`yolo.py`, #12) 추가. D2 는 같은 인터페이스로 학습 중(#13) | `signal_fsm`·`announcer` 는 검출기가 바뀌어도 그대로 |
+| 평가 | 검출기 정확도(`tools/eval_signal.py`)에 더해 상태 머신 출력 지표(`tools/eval_fsm.py`) | 같은 정답 파일·같은 제외 규칙 |
+
+**계획했지만 만들지 않은 모듈**: `preprocess.py`(ROI·리사이즈는 각 검출기 안에서 처리), `paving_offset.py`(#14 Won't), `logs/decisions.csv`(실행 기록이 필요한 기능이 없어 만들지 않음 — 저장하지 않는 데이터가 하나 더 늘었다).
+
+**설계 근거 확인**: 7주차에 "검출 방법을 `Detector` 뒤에 감추면 D0 → D1 → D2 로 바꿔도 상태 머신과 안내는 고치지 않는다"고 했다. 실제로 D1 추가(#41)와 폰 서버 추가(#47) 모두 `signal_fsm.py`·`announcer.py` 변경 없이 머지됐다.
+
 > AI 사용 기록 → `PROMPTS.md`
 
 ---
